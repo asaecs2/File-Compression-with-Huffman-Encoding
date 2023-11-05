@@ -144,6 +144,29 @@ void encodeFile(const string& inputPath, const string& outputPath, const unorder
     }
 }
 
+// Clean up the Huffman tree by deleting all nodes
+void deleteTree(Node* root) {
+    if (root == nullptr) {
+        return;
+    }
+
+    deleteTree(root->left);
+    deleteTree(root->right);
+    delete root;
+}
+
+// Compress a file by building Huffman tree and encoding it
+void compressFile(const string& inputPath, const string& outputPath) {
+    unordered_map<char, int> frequencies = getFrequencies(inputPath);
+    Node* root = buildHuffmanTree(frequencies);
+    unordered_map<char, string> codes;
+    generateCodes(root, "", codes);
+    encodeFile(inputPath, outputPath, codes);
+
+    // Clean up the Huffman tree
+    deleteTree(root);
+}
+
 // Compress a directory by encoding each file within it
 void compressDirectory(const string& inputDirPath, const string& outputDirPath) {
     if (!fs::exists(inputDirPath) || !fs::is_directory(inputDirPath)) {
@@ -163,29 +186,6 @@ void compressDirectory(const string& inputDirPath, const string& outputDirPath) 
             compressFile(inputFilePath, outputFilePath);
         }
     }
-}
-
-// Compress a file by building Huffman tree and encoding it
-void compressFile(const string& inputPath, const string& outputPath) {
-    unordered_map<char, int> frequencies = getFrequencies(inputPath);
-    Node* root = buildHuffmanTree(frequencies);
-    unordered_map<char, string> codes;
-    generateCodes(root, "", codes);
-    encodeFile(inputPath, outputPath, codes);
-
-    // Clean up the Huffman tree
-    deleteTree(root);
-}
-
-// Clean up the Huffman tree by deleting all nodes
-void deleteTree(Node* root) {
-    if (root == nullptr) {
-        return;
-    }
-
-    deleteTree(root->left);
-    deleteTree(root->right);
-    delete root;
 }
 
 int main() {
